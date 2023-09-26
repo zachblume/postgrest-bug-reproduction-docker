@@ -4,7 +4,7 @@ services:
 
   rest:
     container_name: supabase-rest
-    image: postgrest/postgrest:v11.2.0
+    image: postgrest/postgrest:latest
     depends_on:
       db:
         condition: service_healthy
