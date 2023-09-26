@@ -19,7 +19,7 @@ create table
     created_at timestamp with time zone not null default current_timestamp,
     inserted_at timestamp with time zone not null default current_timestamp,
     updated_at timestamp with time zone not null default current_timestamp,
-    organization_id text not null default requesting_org_id (),
+    -- organization_id text not null default requesting_org_id (),
     first_name text null,
     last_name text null,
     addr1 text null,
@@ -36,11 +36,11 @@ create table
     bio text null,
     current_ask_amount integer null,
     name_concat text null,
-    user_id text null default requesting_user_id (),
+    -- user_id text null default requesting_user_id (),
     donor_research text null,
     -- numeric_id integer not null default nextval('people_numeric_id_seq'::regclass),
     constraint people_pkey primary key (id)
-  ) tablespace pg_default;
+  );
 
 create table
   public.interactions (
@@ -56,18 +56,18 @@ create table
     resulted_in_pledge boolean not null default false,
     pledge_id uuid null,
     note text null,
-    organization_id text not null default requesting_org_id (),
+    -- organization_id text not null default requesting_org_id (),
     call_sid text null,
     ended_at timestamp with time zone null,
     call_session_id bigint null,
     phone_number_id uuid null,
-    user_id text null default requesting_user_id (),
+    -- user_id text null default requesting_user_id (),
     constraint interactions_pkey primary key (id),
     constraint interactions_person_id_fkey foreign key (person_id) references people (id)
     -- constraint interactions_call_session_id_fkey foreign key (call_session_id) references call_sessions (id),
     -- constraint interactions_pledge_id_fkey foreign key (pledge_id) references pledges (id),
     -- constraint interactions_phone_number_id_fkey foreign key (phone_number_id) references phone_numbers (id)
-  ) tablespace pg_default;
+  );
 
 --   Some examples in people and interactions for testing
 insert into people (id, first_name, last_name, addr1, addr2, city, state, zip, country, occupation, employer, custom_field_1, custom_field_2, custom_field_3, bio, current_ask_amount, donor_research, name_concat)
