@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+
+  rest:
+    container_name: supabase-rest
+    image: postgrest/postgrest:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      PGRST_DB_URI: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      PGRST_DB_SCHEMAS: ${PGRST_DB_SCHEMAS}
+      PGRST_DB_ANON_ROLE: postgres
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET}
+      PGRST_APP_SETTINGS_JWT_EXP: ${JWT_EXPIRY}
+    command: "postgrest"
+    ports:
+      - 3000:3000
+
+  db:
+    container_name: supabase-db
+    image: supabase/postgres:latest
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal # prevents Realtime polling queries from appearing in logs
+    restart: unless-stopped
+    ports:
+      # Pass down internal port because it's set dynamically by other services
+      - 127.0.0.1:${POSTGRES_PORT}:${POSTGRES_PORT}
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: ${POSTGRES_PORT}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      # Always use a fresh database when developing
+      - /var/lib/postgresql/data
+      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql:Z
